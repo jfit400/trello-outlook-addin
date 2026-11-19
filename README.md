@@ -46,11 +46,22 @@ npm run validate
 
 Open any email. **Add to Trello** shows up in the ribbon, or under **Apps** / the `…` menu in the new Outlook. The first time, click **Connect Trello** and approve access.
 
-## 4. Deploy for real use
+## 4. Hosted version (GitHub Pages)
 
-1. Host the `src/` folder on any static HTTPS host (Azure Static Web Apps, GitHub Pages, Netlify, S3+CloudFront…).
-2. Replace every `https://localhost:3000` in `manifest.xml` with your URL, and add that URL to your Trello key's **Allowed origins**.
-3. Roll it out to your team from the Microsoft 365 admin center: **Settings → Integrated apps → Upload custom apps**, then upload `manifest.xml`.
+The `src/` folder is published to <https://jfit400.github.io/trello-outlook-addin/> by `.github/workflows/pages.yml` on every push to `main`. Nothing needs to run locally.
+
+- Install the hosted add-in with **`manifest.prod.xml`**. It has its own add-in ID, so it can sit alongside the localhost dev copy.
+- Trello key **Allowed origins** must include `https://jfit400.github.io`.
+- If the site address changes, regenerate the manifest: `node scripts/make-manifest.js https://<new-site>/<path>`
+- To roll it out to the team: Microsoft 365 admin center → **Settings → Integrated apps → Upload custom apps**, then upload `manifest.prod.xml`.
+
+### Security notes
+
+- The repo is public. The Trello **API key** in `src/config.js` is designed to be public. Never commit the Trello **Secret**.
+- Users' Trello tokens live only in their Outlook roaming settings and go only to `api.trello.com`.
+- Anyone who can push to this repo can change the code that handles those tokens. Keep 2FA on the GitHub account.
+- Email content is only ever rendered as text (no `innerHTML`), so emails can't inject script into the pane.
+- Revoke a token at Trello → Settings → Applications. Rotate the API key from the Trello app page if it's abused.
 
 ## How it works
 
