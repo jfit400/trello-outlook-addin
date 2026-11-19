@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Connecting to Trello…</title>
+  <link rel="stylesheet" href="auth.css">
+  <script src="config.js"></script>
+</head>
+<body>
+  <p class="center">Redirecting to Trello…</p>
+  <script>
+    // Office dialogs must open on the add-in's own domain first, then navigate to Trello.
+    const params = new URLSearchParams({
+      key: TRELLO_CONFIG.apiKey,
+      name: TRELLO_CONFIG.appName,
+      scope: "read,write",
+      expiration: "never",
+      response_type: "token",
+      callback_method: "fragment",
+      return_url: new URL("auth-callback.html", location.href).href,
+    });
+    location.replace(`https://trello.com/1/authorize?${params}`);
+  </script>
+</body>
+</html>

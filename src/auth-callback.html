@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Connected</title>
+  <link rel="stylesheet" href="auth.css">
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+</head>
+<body>
+  <div class="center">
+    <p id="msg">Finishing sign-in…</p>
+    <div id="fallback" hidden>
+      <p>Almost done. Copy this code, then paste it into the <strong>Trello for Outlook</strong> panel.</p>
+      <input id="code" type="text" readonly>
+      <button id="copy" class="primary">Copy code</button>
+      <p class="muted small">You can close this window after pasting.</p>
+    </div>
+  </div>
+  <script>
+    // Trello returns the token in the URL fragment: #token=abc123
+    const hash = new URLSearchParams(location.hash.slice(1));
+    const token = hash.get("token");
+    const error = hash.get("error") || (token ? null : "Access was not granted.");
+    // Keep the token out of the address bar. office.js deletes history.replaceState, so fall back to clearing the hash.
+    if (typeof history.replaceState === "function") history.replaceState(null, "", location.pathname);
+    else if (token) location.hash = "";
+
+    const msg = document.getElementById("msg");
+    let delivered = false;
+
+    // New Outlook sometimes loses the dialog's link to the task pane after the trip through
+    // trello.com / Atlassian login, so Office.onReady never fires. Fall back to copy/paste.
+    function showFallback() {
+      if (delivered || !token) return;
+      msg.hidden = true;
+      document.getElementById("code").value = token;
+      document.getElementById("fallback").hidden = false;
+    }
+
+    if (!token) {
+      msg.textContent = error;
+    } else {
+      setTimeout(showFallback, 4000);
+      Office.onReady(() => {
+        try {
+          Office.context.ui.messageParent(JSON.stringify({ token }));
+          delivered = true;
+          msg.textContent = "Connected. You can close this window.";
+        } catch (e) {
+          showFallback();
+        }
+      });
+    }
+
+    document.getElementById("copy").addEventListener("click", async () => {
+      const input = document.getElementById("code");
+      input.select();
+      try { await navigator.clipboard.writeText(input.value); } catch { document.execCommand("copy"); }
+      document.getElementById("copy").textContent = "Copied ✓";
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+﻿{
+  "name": "trello-outlook-addin",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Outlook add-in that turns emails into Trello cards.",
+  "scripts": {
+    "certs": "office-addin-dev-certs install",
+    "start": "node server.js",
+    "validate": "office-addin-manifest validate manifest.xml",
+    "sideload": "office-addin-debugging start manifest.xml desktop --no-debug --dev-server \"node server.js\" --dev-server-port 3000"
+  },
+  "devDependencies": {
+    "office-addin-debugging": "^7.0.1",
+    "office-addin-dev-certs": "^3.0.1",
+    "office-addin-manifest": "^3.0.1"
+  }
+}
